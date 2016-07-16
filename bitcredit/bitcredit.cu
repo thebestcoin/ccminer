@@ -10,13 +10,17 @@ extern "C"
 
 
 
-static uint32_t *d_hash[MAX_GPUS] ;
+static uint32_t *d_hash[MAX_GPUS];
+static uint32_t foundnonces[MAX_GPUS][2];
 
 
 
 extern void bitcredit_setBlockTarget(uint32_t * data,const uint32_t * midstate, const void *ptarget);
 extern void bitcredit_cpu_init(uint32_t thr_id, int threads, uint32_t* hash);
-extern uint32_t bitcredit_cpu_hash(uint32_t thr_id, int threads, uint32_t startNounce, int order);
+//extern uint32_t bitcredit_cpu_hash(uint32_t thr_id, int threads, uint32_t startNounce, int order);
+extern void lbrcredit_cpu_hash(uint32_t thr_id, int threads, uint32_t startNounce, const uint32_t *const __restrict__ g_hash, uint32_t *h_found);
+extern void lbrcredit_setBlockTarget(uint32_t* pdata, const void *target);
+
 
  void credithash(void *state, const void *input)
 {
@@ -35,7 +39,8 @@ extern uint32_t bitcredit_cpu_hash(uint32_t thr_id, int threads, uint32_t startN
 
 
 	memcpy(state, hash2, 32);
-}
+
+ }
 
 
      
@@ -43,6 +48,8 @@ extern "C" int scanhash_bitcredit(int thr_id, uint32_t *pdata,
 	const uint32_t *ptarget, const uint32_t *midstate, uint32_t max_nonce,
 	unsigned long *hashes_done)
 {
+
+
 	const uint32_t first_nonce = pdata[35];
 	if (opt_benchmark)
 		((uint32_t*)ptarget)[7] = 0x1;
@@ -61,7 +68,7 @@ extern "C" int scanhash_bitcredit(int thr_id, uint32_t *pdata,
 		cudaDeviceSetCacheConfig(cudaFuncCachePreferL1);
 		 
 		CUDA_SAFE_CALL(cudaMalloc(&d_hash[thr_id],  8 * sizeof(uint32_t) * throughput));
-		bitcredit_cpu_init(thr_id, throughput, d_hash[thr_id]);
+	//	lbrcredit_cpu_init(thr_id, throughput, d_hash[thr_id]);
 		init[thr_id] = true;
 	}
 
@@ -69,18 +76,17 @@ extern "C" int scanhash_bitcredit(int thr_id, uint32_t *pdata,
 		for (int k = 0; k < 42; k++)
 			be32enc(&endiandata[k], ((uint32_t*)pdata)[k]);
 
-	bitcredit_setBlockTarget(pdata,midstate,ptarget);
+	lbrcredit_setBlockTarget(pdata,ptarget);
 	uint64_t nloop = max_nonce/throughput + 1;
 	do {
-		int order = 0;
-		uint32_t foundNonce = bitcredit_cpu_hash(thr_id, throughput, pdata[35], order++);
-		if  (foundNonce != 0xffffffff)
+		lbrcredit_cpu_hash(thr_id, throughput, pdata[35], d_hash[thr_id], foundnonces[thr_id]);
+		if (foundnonces[thr_id][0] != 0xffffffff)
 		{
-				//if (opt_benchmark)
-				//	applog(LOG_INFO, "GPU #%d Found nounce %08x", thr_id, foundNonce);
+				if (opt_benchmark)
+					applog(LOG_INFO, "GPU #%d Found nounce %08x", thr_id, foundnonces[thr_id][0]);
 
-				pdata[35] = foundNonce;
-				*hashes_done = foundNonce - first_nonce;
+				pdata[35] = foundnonces[thr_id][0];
+				*hashes_done = foundnonces[thr_id][0] - first_nonce;
 				return 1;
 
 		}

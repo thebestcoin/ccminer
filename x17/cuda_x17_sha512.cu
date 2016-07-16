@@ -1177,7 +1177,7 @@ __global__ void search2(uint32_t threads, uint32_t startNounce, uint8 *ctx, uint
 
 		uint64_t test = MAKE_ULONGLONG(outbuf.s7, outbuf.s6);
 		//if(!(outbuf.s7)) output[atomic_inc(output+0xFF)] = SWAP32(gid);	
-		if (test <= pTarget[6])
+		if (test <= ((uint64_t *)pTarget)[3])
 		{
 			//yai.
 			uint32_t tmp = atomicCAS(d_found, 0xffffffff, nounce);
@@ -1206,7 +1206,7 @@ __host__ void lbrcredit_cpu_hash(uint32_t thr_id, int threads, uint32_t startNou
 	cudaMemcpy(h_found, d_found[thr_id], 2 * sizeof(uint32_t), cudaMemcpyDeviceToHost);
 }
 
-__host__ void lbrcredit_setBlockTarget(uint32_t* pdata, uint32_t *d_hash, const void *target)
+__host__ void lbrcredit_setBlockTarget(uint32_t* pdata, const void *target)
 {
 
 	unsigned char PaddedMessage[192];
