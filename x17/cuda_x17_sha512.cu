@@ -34,12 +34,15 @@
 * @author phm <phm@inbox.com>
 */
 #include <stdio.h>
-
+#include <memory.h>
 #define USE_SHARED 1
 #define SPH_C64(x) ((uint64_t)(x ## ULL))
 
 #include "cuda_helper.h"
 
+__constant__  uint32_t pTarget[8];
+__constant__  uint32_t  c_data[48];
+static uint32_t *d_found[MAX_GPUS];
 
 
 #define SWAP64(u64) cuda_swab64(u64)
@@ -780,7 +783,7 @@ void __device__ __forceinline__ RIPEMD160_ROUND_BODY(uint32_t *in, uint32_t *h)
 
 
 #define F0(y, x, z) bitselect(z, y, z ^ x)
-#define F1(x, y, z) bitselect(z, y, x)
+//#define F1(x, y, z) bitselect(z, y, x)
 
 #define R0 (W0 = S1(W14) + W9 + S0(W1) + W0)
 #define R1 (W1 = S1(W15) + W10 + S0(W2) + W1)
@@ -944,7 +947,7 @@ __device__ __forceinline__ uint8 sha256_round(uint16 data, uint8 buf)
 	return (res);
 }
 
-__device__ void search(uint32_t threads, uint32_t startNounce,  const uint32_t *input, uint8 *ctx)
+__global__ void search(uint32_t threads, uint32_t startNounce, uint8 *ctx)
 {
 	// SHA256 takes 16 uints of input per block - we have 112 bytes to process
 	// 8 * 16 == 64, meaning two block transforms.
@@ -961,7 +964,7 @@ __device__ void search(uint32_t threads, uint32_t startNounce,  const uint32_t *
 
 		// Remember the last four is the nonce - so 108 bytes / 4 bytes per dword
 #pragma unroll
-		for (int i = 0; i < 16; ++i) SHA256Buf[i] = cuda_swab32(input[i]);
+		for (int i = 0; i < 16; ++i) SHA256Buf[i] = cuda_swab32(c_data[i]);
 
 
 
@@ -983,7 +986,7 @@ __device__ void search(uint32_t threads, uint32_t startNounce,  const uint32_t *
 			if (i == 1)
 			{
 #pragma unroll
-				for (int i = 0; i < 11; ++i) SHA256Buf[i] = cuda_swab32(input[i + 16]);
+				for (int i = 0; i < 11; ++i) SHA256Buf[i] = cuda_swab32(c_data[i + 16]);
 				SHA256Buf[11] = cuda_swab32(hashPosition);
 				SHA256Buf[12] = 0x80000000;
 				SHA256Buf[13] = 0x00000000;
@@ -1048,7 +1051,7 @@ __device__ void search(uint32_t threads, uint32_t startNounce,  const uint32_t *
 		*/
 
 
-
+		/*
 		outbuf.s0 = cuda_swab32(outbuf.s0);
 		outbuf.s1 = cuda_swab32(outbuf.s1);
 		outbuf.s2 = cuda_swab32(outbuf.s2);
@@ -1059,11 +1062,14 @@ __device__ void search(uint32_t threads, uint32_t startNounce,  const uint32_t *
 		outbuf.s7 = cuda_swab32(outbuf.s7);
 
 		ctx[hashPosition] = outbuf;
+		*/
+
+
 		//	ctx[get_global_id(0) - get_global_offset(0)] = outbuf;
 	}
 }
 
-__device__ void search1(uint32_t threads, uint32_t startNounce, uint8 *ctx)
+__global__ void search1(uint32_t threads, uint32_t startNounce, uint8 *ctx)
 {
 	uint64_t W[16] = { 0UL }, SHA512Out[8];
 	uint32_t SHA256Buf[16];
@@ -1137,7 +1143,7 @@ __device__ void search1(uint32_t threads, uint32_t startNounce, uint8 *ctx)
 
 }
 
-__device__ void search2(uint32_t threads, uint32_t startNounce, uint8 *ctx, uint32_t *output, uint64_t target)
+__global__ void search2(uint32_t threads, uint32_t startNounce, uint8 *ctx, uint32_t *d_found)
 {
 
 	uint32_t thread = (blockDim.x * blockIdx.x + threadIdx.x);
@@ -1171,10 +1177,45 @@ __device__ void search2(uint32_t threads, uint32_t startNounce, uint8 *ctx, uint
 
 		uint64_t test = MAKE_ULONGLONG(outbuf.s7, outbuf.s6);
 		//if(!(outbuf.s7)) output[atomic_inc(output+0xFF)] = SWAP32(gid);	
-		if (test <= target)
+		if (test <= pTarget[6])
 		{
 			//yai.
+			uint32_t tmp = atomicCAS(d_found, 0xffffffff, nounce);
+			if (tmp != 0xffffffff)
+				d_found[1] = nounce;
+
 		}
 		//		output[atomic_inc(output + 0xFF)] = SWAP32(gid);
 	}
+}
+
+
+__host__ void lbrcredit_cpu_hash(uint32_t thr_id, int threads, uint32_t startNounce, const uint32_t *const __restrict__ g_hash, uint32_t *h_found)
+{
+	const int threadsperblock = 256;
+
+	dim3 grid((threads + threadsperblock - 1) / threadsperblock);
+	dim3 block(threadsperblock);
+
+	cudaMemset(d_found[thr_id], 0xffffffff, 2 * sizeof(uint32_t));
+
+	search << <grid, block >> >(threads, startNounce, (uint8*)g_hash);
+	search1 << <grid, block >> >(threads, startNounce, (uint8 *)g_hash);
+	search2 << <grid, block >> >(threads, startNounce, (uint8 *)g_hash, d_found[thr_id]);
+
+	cudaMemcpy(h_found, d_found[thr_id], 2 * sizeof(uint32_t), cudaMemcpyDeviceToHost);
+}
+
+__host__ void lbrcredit_setBlockTarget(uint32_t* pdata, uint32_t *d_hash, const void *target)
+{
+
+	unsigned char PaddedMessage[192];
+	memcpy(PaddedMessage, pdata, 168);
+	memset(PaddedMessage + 168, 0, 24);
+	((uint32_t*)PaddedMessage)[42] = 0x80000000;
+	((uint32_t*)PaddedMessage)[47] = 0x0540;
+
+	CUDA_SAFE_CALL(cudaMemcpyToSymbol(pTarget, target, 8 * sizeof(uint32_t), 0, cudaMemcpyHostToDevice));
+	CUDA_SAFE_CALL(cudaMemcpyToSymbol(c_data, PaddedMessage, 48 * sizeof(uint32_t), 0, cudaMemcpyHostToDevice));
+
 }
