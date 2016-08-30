@@ -111,8 +111,8 @@ int scanhash_skeincoin(int thr_id, uint32_t *pdata,
 						res++;
 					}
 				}
-				pdata[19] = swab32_if(foundnonces[thr_id][0], !swap);
 				*hashes_done = pdata[19] - first_nonce + throughput;
+				pdata[19] = swab32_if(foundnonces[thr_id][0], !swap);
 				return res;
 			}
 			else 
