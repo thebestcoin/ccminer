@@ -36,6 +36,7 @@ Debug/
 Release/
 x64/Debug/
 x64/Release/
+*.v12.suo
 *.suo
 *.user
 *.opensdf
@@ -49,6 +50,7 @@ x64/Release/
 .loadpath
 .cproject
 .buildpath
+nbproject/
 
 compat/curl-for-windows/
 

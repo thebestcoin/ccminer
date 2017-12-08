@@ -73,6 +73,9 @@
     <Filter Include="Source Files\CUDA\Lyra2">
       <UniqueIdentifier>{03b56ddb-6ebb-40b7-9a62-0a22c8c2865f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\thebestcoinccm">
+      <UniqueIdentifier>{236ba524-752c-4054-b50c-bbfa5e277188}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="compat\jansson\dump.c">
@@ -213,12 +216,6 @@
     <ClCompile Include="compat\jansson\error.c">
       <Filter>Source Files\jansson</Filter>
     </ClCompile>
-    <ClCompile Include="lyra2\Lyra2.c">
-      <Filter>Source Files\sph</Filter>
-    </ClCompile>
-    <ClCompile Include="lyra2\Sponge.c">
-      <Filter>Source Files\sph</Filter>
-    </ClCompile>
     <ClCompile Include="scrypt-jane.cpp" />
     <ClCompile Include="scrypt.cpp" />
     <ClCompile Include="api.cpp">
@@ -233,6 +230,8 @@
     <ClCompile Include="sph\hefty1.cpp">
       <Filter>Source Files\sph</Filter>
     </ClCompile>
+    <ClCompile Include="lyra2\Lyra2.c" />
+    <ClCompile Include="lyra2\Sponge.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="compat.h">
@@ -367,17 +366,19 @@
     <ClInclude Include="compat\jansson\jansson_config.h">
       <Filter>Header Files\compat</Filter>
     </ClInclude>
-    <ClInclude Include="lyra2\Lyra2.h">
-      <Filter>Header Files\lyra2</Filter>
-    </ClInclude>
-    <ClInclude Include="lyra2\Sponge.h">
-      <Filter>Header Files\lyra2</Filter>
-    </ClInclude>
     <ClInclude Include="scrypt\salsa_kernel.h" />
     <ClInclude Include="sph\neoscrypt.h" />
     <ClInclude Include="sph\sha256_Y.h" />
     <ClInclude Include="sph\sysendian.h" />
     <ClInclude Include="log.h" />
+    <ClInclude Include="lyra2\Lyra2.h" />
+    <ClInclude Include="lyra2\Sponge.h" />
+    <ClInclude Include="thebestcoinccm\cuda_utils.h">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </ClInclude>
+    <ClInclude Include="thebestcoinccm\cuda_lyra2v2_var.h">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="cuda.cpp">
@@ -585,18 +586,6 @@
     <CudaCompile Include="Algo256\cuda_cubehash256.cu">
       <Filter>Source Files\CUDA\Algo256</Filter>
     </CudaCompile>
-    <CudaCompile Include="lyra2\cuda_lyra2.cu">
-      <Filter>Source Files\CUDA\Lyra2</Filter>
-    </CudaCompile>
-    <CudaCompile Include="lyra2\lyra2RE.cu">
-      <Filter>Source Files\CUDA\Lyra2</Filter>
-    </CudaCompile>
-    <CudaCompile Include="lyra2\cuda_lyra2v2.cu">
-      <Filter>Source Files\CUDA\Lyra2</Filter>
-    </CudaCompile>
-    <CudaCompile Include="lyra2\lyra2REv2.cu">
-      <Filter>Source Files\CUDA\Lyra2</Filter>
-    </CudaCompile>
     <CudaCompile Include="x15\bastion.cu">
       <Filter>Source Files\CUDA\x15</Filter>
     </CudaCompile>
@@ -605,6 +594,16 @@
     </CudaCompile>
     <CudaCompile Include="x11\cuda_x11_luffa512.cu">
       <Filter>Source Files\CUDA\x11</Filter>
+    </CudaCompile>
+    <CudaCompile Include="thebestcoinccm\thebestcoinccm.cu">
+      <Filter>Source Files\thebestcoinccm</Filter>
+    </CudaCompile>
+    <CudaCompile Include="lyra2\cuda_lyra2.cu" />
+    <CudaCompile Include="lyra2\cuda_lyra2v2.cu" />
+    <CudaCompile Include="lyra2\lyra2RE.cu" />
+    <CudaCompile Include="lyra2\lyra2REv2.cu" />
+    <CudaCompile Include="thebestcoinccm\cuda_lyra2v2_var.cu">
+      <Filter>Source Files\thebestcoinccm</Filter>
     </CudaCompile>
   </ItemGroup>
 </Project>

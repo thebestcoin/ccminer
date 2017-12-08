@@ -84,6 +84,7 @@ struct workio_cmd {
 };
 
 enum sha_algos {
+	ALGO_THEBESTCOIN,
 	ALGO_BASTION,
 	ALGO_BITC,
 	ALGO_BITCOIN,
@@ -127,6 +128,7 @@ enum sha_algos {
 };
 
 static const char *algo_names[] = {
+	"thebestcoin",
 	"bastion",
 	"credit",
 	"bitcoin",
@@ -190,7 +192,7 @@ int opt_timeout = 270;
 static int opt_scantime = 5;
 static json_t *opt_config;
 static const bool opt_time = true;
-static enum sha_algos opt_algo = ALGO_X11;
+static enum sha_algos opt_algo = ALGO_THEBESTCOIN;
 int opt_n_threads = 0;
 int opt_n_gputhreads = 1;
 int opt_affinity = -1;
@@ -272,6 +274,7 @@ static char const usage[] = "\
 Usage: " PROGRAM_NAME " [OPTIONS]\n\
 Options:\n\
   -a, --algo=ALGO       specify the hash algorithm to use\n\
+			thebestcoin Thebestcoin (default)\n\
 			bastion		bastioncoin\n\
 			bitcoin     Bitcoin\n\
 			blake       Blake 256 (SFR/NEOS)\n\
@@ -1168,11 +1171,6 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 //	/+Increment extranonce2 +/
 
 	for (i = 0; i < (int)sctx->xnonce2_size && !++sctx->job.xnonce2[i]; i++);
-	{
-		sctx->job.xnonce2[i]++;		
-	}
-
-
 
 	/* Assemble block header */
 	memset(work->data, 0, sizeof(work->data));
@@ -1219,6 +1217,7 @@ static void stratum_gen_work(struct stratum_ctx *sctx, struct work *work)
 		case ALGO_NEO:
 			diff_to_target(work->target, sctx->job.diff / (65536.0 * opt_difficulty));
 			break;
+		case ALGO_THEBESTCOIN:
 		case ALGO_DMD_GR:
 		case ALGO_MYR_GR:
 		case ALGO_FRESH:
@@ -1463,6 +1462,7 @@ static void *miner_thread(void *userdata)
 			case ALGO_WHC:
 				minmax = 0x70000000U;
 				break;
+			case ALGO_THEBESTCOIN:
 			case ALGO_SKEIN:
 			case ALGO_BITCOIN:
 			case ALGO_WHCX:
@@ -1532,6 +1532,11 @@ static void *miner_thread(void *userdata)
 
 		/* scan nonces for a proof-of-work hash */
 		switch (opt_algo) {
+
+		case ALGO_THEBESTCOIN:
+			rc = scanhash_thebestcoinccm(thr_id, work.data, work.target,
+				max_nonce, &hashes_done);
+			break;
 
 		case ALGO_HEAVY:
 			rc = scanhash_heavy(thr_id, work.data, work.target,
@@ -2716,7 +2721,7 @@ int main(int argc, char *argv[])
 	opt_syslog_pfx = strdup(PROGRAM_NAME);
 	opt_api_allow = strdup("127.0.0.1"); /* 0.0.0.0 for all ips */
 
-	printf("SP-Mod 1.5.79 \n");
+	printf("Version %s \n", VERSION);
 #ifdef _MSC_VER
 	printf("Compiled with Visual C++ %d ", _MSC_VER / 100);
 #else

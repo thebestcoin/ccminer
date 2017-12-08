@@ -22,6 +22,17 @@
 cudaStream_t gpustream[MAX_GPUS] = { 0 };
 extern int opt_api_listen;
 
+#define checkCudaErrors(val) check( (val), #val, __FILE__, __LINE__)
+
+template<typename T>
+void check(T err, const char* const func, const char* const file, const int line) {
+  if (err != cudaSuccess) {
+	applog(LOG_ERR, "CUDA error at: %s:%d", file, line);
+	applog(LOG_ERR, cudaGetErrorString(err));
+    exit(1);
+  }
+}
+
 // CUDA Devices on the System
 int cuda_num_devices()
 {
@@ -45,6 +56,7 @@ int cuda_num_devices()
 	if (err != cudaSuccess)
 	{
 		applog(LOG_ERR, "Unable to query number of CUDA devices! Is an nVidia driver installed?");
+		checkCudaErrors(err);
 		exit(1);
 	}
 	return GPU_N;
@@ -58,6 +70,7 @@ void cuda_devicenames()
 	if (err != cudaSuccess)
 	{
 		applog(LOG_ERR, "Unable to query number of CUDA devices! Is an nVidia driver installed?");
+		checkCudaErrors(err);
 		exit(1);
 	}
 

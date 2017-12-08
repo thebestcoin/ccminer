@@ -31,3 +31,59 @@ To rebuild them, you need to clone this repository and its submodules :
 
 There is also a [Tutorial for windows](http://cudamining.co.uk/url/tutorials/id/3) on [CudaMining](http://cudamining.co.uk) website.
 
+Build on Windows
+----------------
+
+Requirements:
+* Windows 10, 8, 7, ... or whatever
+* Visual Studio 2013 (There are known issues on VS2015, so be careful)
+* CUDA Toolkit 9.0
+
+OpenSSL, Curl and pthreads are already prebuilt in the project, as it stated above.  
+Ensure you've selected the "Release" build configuration and Win32 platform (you may try x64 also).
+In the Project Options, ensure the "Code Generation" option supports your video card.
+
+Run "Build solution".  
+Go to "Release" folder (or "x64\Release" if you've chosen x64 build). Check the program working:
+
+    ccminer.exe --benchmark
+
+Build on linux
+--------------
+
+Requirements:
+* Ubuntu 16.04
+* CUDA Toolkit 9.0
+    ```
+    sudo apt-get install autotools-dev automake pkg-config libtool libssl-dev libcurl4-openssl-dev
+    ./autogen.sh
+    ./configure
+    ./build.sh
+    echo $?
+    ```
+
+If the last command outputs "0", the build completed successfully. Run the command to check if everything is fine:
+
+    ./ccminer --benchmark
+
+Build on Linux using Docker nvidia/cuda image
+---------------------------------------------
+
+Requirements:
+
+* Docker
+* 2 Gb image download
+
+Build the image
+
+    ./docker-build.sh
+
+Build the project
+
+    ./docker-run.sh bash autogen.sh
+    ./docker-run.sh ./configure
+    ./docker-run.sh ./build.sh
+
+Check the project
+
+    ./docker-run.sh ./ccminer --benchmark

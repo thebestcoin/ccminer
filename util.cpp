@@ -1558,6 +1558,10 @@ void print_hash_tests(void)
 	printf(CL_WHT "CPU HASH ON EMPTY BUFFER RESULTS:" CL_N "\n");
 
 	memset(hash, 0, sizeof hash);
+	thebestcoinccm_hash(&hash[0], &buf[0]);
+	printpfx("thebestcoin", hash);
+
+	memset(hash, 0, sizeof hash);
 	blake256hash(&hash[0], &buf[0], 8);
 	printpfx("blakecoin", hash);
 
@@ -1600,6 +1604,10 @@ void print_hash_tests(void)
 	memset(hash, 0, sizeof hash);
 	lyra2_hash(&hash[0], &buf[0]);
 	printpfx("lyra2", hash);
+
+	memset(hash, 0, sizeof hash);
+	lyra2v2_hash(&hash[0], &buf[0]);
+	printpfx("lyra2v2", hash);
 
 	memset(hash, 0, sizeof hash);
 	myriadhash(&hash[0], &buf[0]);

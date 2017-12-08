@@ -263,6 +263,10 @@ void sha256_init_8way(uint32_t *state);
 void sha256_transform_8way(uint32_t *state, const uint32_t *block, int swap);
 #endif
 
+extern int scanhash_thebestcoinccm(int thr_id, uint32_t *pdata,
+	const uint32_t *ptarget, uint32_t max_nonce,
+	unsigned long *hashes_done);
+
 extern int scanhash_sha256d(int thr_id, uint32_t *pdata,
 	const uint32_t *ptarget, uint32_t max_nonce, unsigned long *hashes_done);
 
@@ -640,6 +644,7 @@ size_t time2str(char* buf, time_t timer);
 char* atime2str(time_t timer);
 
 void print_hash_tests(void);
+void thebestcoinccm_hash(void *state, const void *input);
 void blake256hash(void *output, const void *input, int8_t rounds);
 void deephash(void *state, const void *input);
 void doomhash(void *state, const void *input);
@@ -650,6 +655,7 @@ void keccak256_hash(void *state, const void *input);
 uint32_t jackpothash(void *state, const void *input);
 void groestlhash(void *state, const void *input);
 void lyra2_hash(void *state, const void *input);
+void lyra2v2_hash(void *state, const void *input);
 void myriadhash(void *state, const void *input);
 void nist5hash(void *state, const void *input);
 void pentablakehash(void *output, const void *input);
