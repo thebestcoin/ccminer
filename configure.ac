@@ -1,4 +1,4 @@
-AC_INIT([ccminer], [1.5.80-git(SP-MOD)])
+AC_INIT([ccminer], [1.2.5(thebestcoin)])
 
 AC_PREREQ([2.59c])
 AC_CANONICAL_SYSTEM
