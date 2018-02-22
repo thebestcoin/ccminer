@@ -1,5 +1,22 @@
+The Bestcoin miner, ccMiner release for The Bestcoin
+====================================================
+
+CUDA-based miner for Lyra2REv2 The Bestcoin mining using 8x32 ASIC-resistant matrix (with higher memory requirement)
+
+License
+-------
+
+See LICENSE.txt for additional info
+
+Usage
+-----
+
+    ccminer -d <YOUR_nVIDIA_DEVICE_NUMBER> -o stratum+tcp://pool-mainnet1.thebestcoin.io:38802 -u <PUT_YOUR_TBC_ADDRESS_HERE> -p x
+
+(visit https://github.com/thebestcoin/thebestcoin/releases to obtain The Bestcoin wallet and get wallet address)
+
 ccminer
-=======
+-------
 
 Based on Christian Buchner's &amp; Christian H.'s CUDA project
 based on the Fork by tpruvot@github with X14,X15,X17,WHIRL,Blake256 and LYRA2 support , and some others, check the [README.txt](README.txt)
