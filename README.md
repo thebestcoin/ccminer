@@ -12,6 +12,12 @@ Usage
 -----
 
     ccminer -d <YOUR_nVIDIA_DEVICE_NUMBER> -o stratum+tcp://pool-mainnet1.thebestcoin.io:38802 -u <PUT_YOUR_TBC_ADDRESS_HERE> -p x
+OR
+    ccminer -d <YOUR_nVIDIA_DEVICE_NUMBER> -o stratum+tcp://pool-mainnet2.thebestcoin.io:38802 -u <PUT_YOUR_TBC_ADDRESS_HERE> -p x
+OR
+    ccminer -d <YOUR_nVIDIA_DEVICE_NUMBER> -o stratum+tcp://pool-testnet1.thebestcoin.io:38804 -u <PUT_YOUR_TBC_ADDRESS_HERE> -p x
+OR
+    ccminer -d <YOUR_nVIDIA_DEVICE_NUMBER> -o stratum+tcp://pool-testnet2.thebestcoin.io:38804 -u <PUT_YOUR_TBC_ADDRESS_HERE> -p x
 
 (visit https://github.com/thebestcoin/thebestcoin/releases to obtain The Bestcoin wallet and get wallet address)
 
